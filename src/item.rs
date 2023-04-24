@@ -20,7 +20,7 @@ static INIT_DURATION: chrono::Duration = chrono::Duration::hours(8);
 
 impl Item {
     pub fn correct(&mut self, now: &UtcTime) {
-        info!("{} is correct.", self.question);
+        info!("correct: {}", self.question);
         self.last_remember_time.replace(*now);
         if let Some(ref mut dur) = self.duration {
             *dur = *dur + *dur;
@@ -43,7 +43,7 @@ impl Item {
     }
 
     pub fn wrong(&mut self, now: &UtcTime) {
-        warn!("{} is wrong.", self.question);
+        warn!("  wrong: {}", self.question);
         self.duration.replace(INIT_DURATION.clone());
         let timeout = self.timeout();
         self.due_time.replace(*now + timeout);

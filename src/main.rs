@@ -6,7 +6,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 fn main() {
-    flexi_logger::Logger::try_with_env_or_str("error, memory-palace=info")
+    flexi_logger::Logger::try_with_env_or_str("error, memory_palace=info")
         .unwrap()
         .use_utc()
         .adaptive_format_for_stderr(flexi_logger::AdaptiveFormat::Detailed)
