@@ -2,8 +2,8 @@ use chrono::prelude::*;
 use clap::Parser;
 use log::*;
 use memory_palace::*;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 fn main() {
     flexi_logger::Logger::try_with_env_or_str("error, memory_palace=info")

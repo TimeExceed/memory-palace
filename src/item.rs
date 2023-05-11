@@ -1,7 +1,7 @@
+use crate::UtcTime;
 use log::*;
 use rand::prelude::*;
 use static_init::dynamic;
-use crate::UtcTime;
 
 #[derive(Debug, Clone)]
 pub struct Item {
@@ -25,10 +25,10 @@ impl Item {
         if let Some(ref mut dur) = self.duration {
             *dur = *dur + *dur;
             if *dur > *MAX_DURATION {
-                *dur = MAX_DURATION.clone();
+                *dur = *MAX_DURATION;
             }
         } else {
-            self.duration.replace(INIT_DURATION.clone());
+            self.duration.replace(*INIT_DURATION);
         }
         let timeout = self.timeout();
         self.due_time.replace(*now + timeout);
@@ -38,13 +38,13 @@ impl Item {
     pub fn timeout(&mut self) -> chrono::Duration {
         let int_dur = self.duration.unwrap().num_seconds();
         let mut rng = rand::thread_rng();
-        let timeout = rng.gen_range((int_dur/2)..int_dur);
+        let timeout = rng.gen_range((int_dur / 2)..int_dur);
         chrono::Duration::seconds(timeout)
     }
 
     pub fn wrong(&mut self, now: &UtcTime) {
         warn!("  wrong: {}", self.question);
-        self.duration.replace(INIT_DURATION.clone());
+        self.duration.replace(*INIT_DURATION);
         let timeout = self.timeout();
         self.due_time.replace(*now + timeout);
         self.last_check_time.replace(*now);
@@ -58,7 +58,9 @@ pub struct Selected {
 
 impl Selected {
     pub fn new(items: Vec<Item>, now: &UtcTime, take: Option<usize>) -> Self {
-        let mut selected_and_correctness: Vec<_> = items.iter().enumerate()
+        let mut selected_and_correctness: Vec<_> = items
+            .iter()
+            .enumerate()
             .filter(|(_, x)| {
                 if let Some(due) = x.due_time {
                     due < *now
@@ -68,11 +70,17 @@ impl Selected {
             })
             .map(|(i, _)| (i, true))
             .collect();
-        debug!("{} items selected.", selected_and_correctness.len());
         let mut rng = rand::thread_rng();
         selected_and_correctness.shuffle(&mut rng);
         if let Some(n) = take {
+            info!("{}/{} items selected.", n, selected_and_correctness.len());
             selected_and_correctness.truncate(n);
+        } else {
+            info!(
+                "{}/{} items selected.",
+                selected_and_correctness.len(),
+                selected_and_correctness.len()
+            );
         }
         Self {
             items,
@@ -95,7 +103,8 @@ impl Selected {
     }
 
     pub fn items(&self) -> Vec<(Item, bool)> {
-        self.selected_and_correctness.iter()
+        self.selected_and_correctness
+            .iter()
             .map(|(x, c)| (self.items[*x].clone(), *c))
             .collect()
     }

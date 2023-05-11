@@ -1,7 +1,7 @@
-use chrono::prelude::*;
 use crate::*;
+use chrono::prelude::*;
 use log::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub fn read_file(file_name: &str) -> Vec<Item> {
     let content = std::fs::read(file_name).unwrap();
@@ -13,14 +13,10 @@ pub fn read_file(file_name: &str) -> Vec<Item> {
 
 pub fn write_out(file_name: &str, items: Vec<Item>) {
     debug!("write {} items into {}.", items.len(), file_name);
-    let items: Vec<ItemInDisk> = items.into_iter()
-        .map(|x| x.into())
-        .collect();
-    let items = ItemsInDisk {
-        items,
-    };
+    let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
+    let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();
-    std::fs::write(file_name, &content).unwrap();
+    std::fs::write(file_name, content).unwrap();
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,7 +40,6 @@ struct ItemInDisk {
     duration: Option<String>,
 }
 
-
 impl From<ItemInDisk> for Item {
     fn from(value: ItemInDisk) -> Self {
         Self {
@@ -65,7 +60,7 @@ impl From<ItemInDisk> for Item {
             duration: value.duration.map(|x| {
                 let dur: iso8601_duration::Duration = x.parse().unwrap();
                 dur.to_chrono().unwrap()
-            })
+            }),
         }
     }
 }
@@ -92,9 +87,18 @@ impl From<toml::value::Datetime> for WrapDatetime {
         let toml_date = value.date.unwrap();
         let toml_time = value.time.unwrap();
         let date = chrono::NaiveDate::from_ymd_opt(
-            toml_date.year as i32, toml_date.month as u32, toml_date.day as u32).unwrap();
+            toml_date.year as i32,
+            toml_date.month as u32,
+            toml_date.day as u32,
+        )
+        .unwrap();
         let time = chrono::NaiveTime::from_hms_nano_opt(
-            toml_time.hour as u32, toml_time.minute as u32, toml_time.second as u32, toml_time.nanosecond as u32).unwrap();
+            toml_time.hour as u32,
+            toml_time.minute as u32,
+            toml_time.second as u32,
+            toml_time.nanosecond,
+        )
+        .unwrap();
         let datetime = chrono::NaiveDateTime::new(date, time);
         let datetime = UtcTime::from_utc(datetime, Utc);
         Self(datetime)

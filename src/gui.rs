@@ -1,9 +1,9 @@
 use crate::Selected;
-use log::*;
-use std::rc::Rc;
-use std::cell::RefCell;
 use eframe::egui;
 use egui::widget_text::RichText;
+use log::*;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct App {
     selected: Rc<RefCell<Selected>>,
@@ -12,9 +12,7 @@ pub struct App {
 impl App {
     pub fn new(ctx: &egui::Context, selected: Rc<RefCell<Selected>>) -> Self {
         setup_custom_fonts(ctx);
-        Self {
-            selected,
-        }
+        Self { selected }
     }
 
     pub fn start(file_name: &str, selected: Rc<RefCell<Selected>>) {
@@ -25,8 +23,9 @@ impl App {
         eframe::run_native(
             &format!("{} - Memory Palace", file_name),
             options,
-            Box::new(move |cc| Box::new(Self::new(&cc.egui_ctx, selected.clone()))),
-        ).unwrap();
+            Box::new(move |cc| Box::new(Self::new(&cc.egui_ctx, selected))),
+        )
+        .unwrap();
         debug!("GUI quits.");
     }
 }
@@ -39,7 +38,10 @@ impl eframe::App for App {
                 egui::Grid::new(ui.next_auto_id()).show(ui, |ui| {
                     for (item, corr) in items.iter_mut() {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.checkbox(corr, RichText::new(item.question.clone()).monospace().size(16.0));
+                            ui.checkbox(
+                                corr,
+                                RichText::new(item.question.clone()).monospace().size(16.0),
+                            );
                         });
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.label(RichText::new(item.answer.clone()).monospace().size(16.0));
