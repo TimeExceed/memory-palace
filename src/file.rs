@@ -38,6 +38,7 @@ struct ItemInDisk {
     #[serde(rename = "due-time")]
     due_time: Option<toml::value::Datetime>,
     duration: Option<String>,
+    tag: Option<String>,
 }
 
 impl From<ItemInDisk> for Item {
@@ -61,6 +62,7 @@ impl From<ItemInDisk> for Item {
                 let dur: iso8601_duration::Duration = x.parse().unwrap();
                 dur.to_chrono().unwrap()
             }),
+            tag: value.tag,
         }
     }
 }
@@ -74,6 +76,7 @@ impl From<Item> for ItemInDisk {
             last_check_time: value.last_check_time.map(|x| WrapDatetime(x).into()),
             due_time: value.due_time.map(|x| WrapDatetime(x).into()),
             duration: value.duration.map(|x| format!("{}", x)),
+            tag: value.tag,
         }
     }
 }
