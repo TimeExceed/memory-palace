@@ -11,6 +11,7 @@ pub struct Item {
     pub last_check_time: Option<UtcTime>,
     pub due_time: Option<UtcTime>,
     pub duration: Option<chrono::Duration>,
+    pub tag: Option<String>,
 }
 
 #[dynamic]
