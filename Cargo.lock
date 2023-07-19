@@ -1325,16 +1325,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iso8601-duration"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a26adff60a5d3ca10dc271ad37a34ff376595d2a1e5f21d02564929ca888c511"
-dependencies = [
- "chrono",
- "nom",
-]
-
-[[package]]
 name = "jni"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1480,13 +1470,12 @@ dependencies = [
 
 [[package]]
 name = "memory-palace"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "clap",
  "eframe",
  "flexi_logger",
- "iso8601-duration",
  "log",
  "rand",
  "serde",

@@ -31,13 +31,12 @@ struct ItemInDisk {
     #[serde(rename = "a")]
     answer: String,
 
-    #[serde(rename = "last-remember-time")]
-    last_remember_time: Option<toml::value::Datetime>,
+    #[serde(rename = "first-remember-time")]
+    first_remember_time: Option<toml::value::Datetime>,
     #[serde(rename = "last-check-time")]
     last_check_time: Option<toml::value::Datetime>,
     #[serde(rename = "due-time")]
     due_time: Option<toml::value::Datetime>,
-    duration: Option<String>,
     tag: Option<String>,
 }
 
@@ -46,7 +45,7 @@ impl From<ItemInDisk> for Item {
         Self {
             question: value.question,
             answer: value.answer,
-            last_remember_time: value.last_remember_time.map(|x| {
+            first_remember_time: value.first_remember_time.map(|x| {
                 let wrapped: WrapDatetime = x.into();
                 wrapped.0
             }),
@@ -58,10 +57,6 @@ impl From<ItemInDisk> for Item {
                 let wrapped: WrapDatetime = x.into();
                 wrapped.0
             }),
-            duration: value.duration.map(|x| {
-                let dur: iso8601_duration::Duration = x.parse().unwrap();
-                dur.to_chrono().unwrap()
-            }),
             tag: value.tag,
         }
     }
@@ -72,10 +67,9 @@ impl From<Item> for ItemInDisk {
         Self {
             question: value.question,
             answer: value.answer,
-            last_remember_time: value.last_remember_time.map(|x| WrapDatetime(x).into()),
+            first_remember_time: value.first_remember_time.map(|x| WrapDatetime(x).into()),
             last_check_time: value.last_check_time.map(|x| WrapDatetime(x).into()),
             due_time: value.due_time.map(|x| WrapDatetime(x).into()),
-            duration: value.duration.map(|x| format!("{}", x)),
             tag: value.tag,
         }
     }

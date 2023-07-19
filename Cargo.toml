@@ -1,6 +1,6 @@
 [package]
 name = "memory-palace"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
@@ -8,7 +8,6 @@ chrono = "0.4"
 clap = {version = "4.2", features = ["derive"]}
 eframe = "0.21.3"
 flexi_logger = "0.25.3"
-iso8601-duration = {version = "0.2.0", features = ["chrono"]}
 log = "0.4.17"
 rand = "0.8.5"
 serde = {version = "1.0", features = ["derive"]}

@@ -7,10 +7,9 @@ use static_init::dynamic;
 pub struct Item {
     pub question: String,
     pub answer: String,
-    pub last_remember_time: Option<UtcTime>,
+    pub first_remember_time: Option<UtcTime>,
     pub last_check_time: Option<UtcTime>,
     pub due_time: Option<UtcTime>,
-    pub duration: Option<chrono::Duration>,
     pub tag: Option<String>,
 }
 
@@ -22,35 +21,34 @@ static INIT_DURATION: chrono::Duration = chrono::Duration::hours(8);
 impl Item {
     pub fn correct(&mut self, now: &UtcTime) {
         info!("correct: {}", self.question);
-        self.last_remember_time.replace(*now);
-        if let Some(ref mut dur) = self.duration {
-            *dur = *dur + *dur;
-            if *dur > *MAX_DURATION {
-                *dur = *MAX_DURATION;
-            }
+        if let Some(ref first_remember_time) = self.first_remember_time {
+            let timeout = timeout(&(*now - *first_remember_time));
+            self.due_time.replace(*now + timeout);
         } else {
-            self.duration.replace(*INIT_DURATION);
+            self.first_remember_time = Some(*now);
+            let timeout = timeout(&INIT_DURATION);
+            self.due_time.replace(*now + timeout);
         }
-        let timeout = self.timeout();
-        self.due_time.replace(*now + timeout);
         self.last_check_time.replace(*now);
-    }
-
-    pub fn timeout(&mut self) -> chrono::Duration {
-        let int_dur = self.duration.unwrap().num_seconds();
-        let mut rng = rand::thread_rng();
-        let timeout = rng.gen_range((int_dur / 2)..int_dur);
-        chrono::Duration::seconds(timeout)
     }
 
     pub fn wrong(&mut self, now: &UtcTime) {
         warn!("  wrong: {}", self.question);
-        self.duration.replace(*INIT_DURATION);
-        let timeout = self.timeout();
+        self.first_remember_time = None;
+        let timeout = timeout(&INIT_DURATION);
         self.due_time.replace(*now + timeout);
         self.last_check_time.replace(*now);
     }
 }
+
+fn timeout(delay: &chrono::Duration) -> chrono::Duration {
+    let int_dur = delay.num_seconds();
+    let mut rng = rand::thread_rng();
+    let timeout = rng.gen_range((int_dur / 2)..int_dur);
+    chrono::Duration::seconds(timeout)
+}
+
+
 
 pub struct Selected {
     items: Vec<Item>,
