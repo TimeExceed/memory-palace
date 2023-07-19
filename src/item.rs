@@ -44,7 +44,7 @@ impl Item {
 fn timeout(delay: &chrono::Duration) -> chrono::Duration {
     let int_dur = delay.num_seconds();
     let mut rng = rand::thread_rng();
-    let timeout = rng.gen_range((int_dur / 2)..int_dur);
+    let timeout = rng.gen_range(int_dur..(int_dur + (int_dur / 2)));
     chrono::Duration::seconds(timeout)
 }
 
