@@ -16,10 +16,7 @@ impl App {
     }
 
     pub fn start(file_name: &str, selected: Rc<RefCell<Selected>>) {
-        let options = eframe::NativeOptions {
-            initial_window_size: Some(egui::vec2(450.0, 320.0)),
-            ..Default::default()
-        };
+        let options = eframe::NativeOptions::default();
         eframe::run_native(
             &format!("{} - Memory Palace", file_name),
             options,

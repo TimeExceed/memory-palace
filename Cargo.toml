@@ -1,15 +1,15 @@
 [package]
 name = "memory-palace"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-clap = {version = "4.2", features = ["derive"]}
-eframe = "0.21.3"
-flexi_logger = "0.25.3"
-log = "0.4.17"
-rand = "0.8.5"
+clap = {version = "4.5", features = ["derive"]}
+eframe = "0.26"
+flexi_logger = "0.27"
+log = "0.4"
+rand = "0.8"
 serde = {version = "1.0", features = ["derive"]}
 static_init = "1.0.3"
-toml = "0.7"
+toml = "0.8"

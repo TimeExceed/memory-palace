@@ -97,7 +97,7 @@ impl From<toml::value::Datetime> for WrapDatetime {
         )
         .unwrap();
         let datetime = chrono::NaiveDateTime::new(date, time);
-        let datetime = UtcTime::from_utc(datetime, Utc);
+        let datetime = UtcTime::from_naive_utc_and_offset(datetime, Utc);
         Self(datetime)
     }
 }
