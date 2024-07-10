@@ -20,7 +20,7 @@ impl App {
         eframe::run_native(
             &format!("{} - Memory Palace", file_name),
             options,
-            Box::new(move |cc| Box::new(Self::new(&cc.egui_ctx, selected))),
+            Box::new(move |cc| Ok(Box::new(Self::new(&cc.egui_ctx, selected)))),
         )
         .unwrap();
         debug!("GUI quits.");

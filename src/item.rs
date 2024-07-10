@@ -1,7 +1,6 @@
 use crate::UtcTime;
 use log::*;
 use rand::prelude::*;
-use static_init::dynamic;
 
 #[derive(Debug, Clone)]
 pub struct Item {
@@ -13,10 +12,8 @@ pub struct Item {
     pub tag: Option<String>,
 }
 
-#[dynamic]
-static MAX_DURATION: chrono::Duration = chrono::Duration::days(180);
-#[dynamic]
-static INIT_DURATION: chrono::Duration = chrono::Duration::hours(8);
+const MAX_DURATION: chrono::Duration = chrono::Duration::days(180);
+const INIT_DURATION: chrono::Duration = chrono::Duration::hours(8);
 
 impl Item {
     pub fn correct(&mut self, now: &UtcTime) {
@@ -47,8 +44,6 @@ fn timeout(delay: &chrono::Duration) -> chrono::Duration {
     let timeout = rng.gen_range(int_dur..(int_dur + (int_dur / 2)));
     chrono::Duration::seconds(timeout)
 }
-
-
 
 pub struct Selected {
     items: Vec<Item>,
