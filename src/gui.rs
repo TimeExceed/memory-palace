@@ -2,8 +2,7 @@ use crate::Selected;
 use eframe::egui;
 use egui::widget_text::RichText;
 use log::*;
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 pub struct App {
     selected: Rc<RefCell<Selected>>,
@@ -63,9 +62,9 @@ fn setup_custom_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
     fonts.font_data.insert(
         "cjk".to_owned(),
-        egui::FontData::from_static(include_bytes!(
+        Arc::new(egui::FontData::from_static(include_bytes!(
             "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-        )),
+        ))),
     );
     if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
         fs.push("cjk".to_owned());
