@@ -15,8 +15,16 @@ fn main() {
     let args = Args::parse();
     let items = read_file(&args.file_name);
     let now = Utc::now();
-    let selected = Rc::new(RefCell::new(Selected::new(items, &now, args.take)));
+    let selected = if let Some(ref selected_in) = args.selected_in {
+        Selected::read_back(items, selected_in)
+    } else {
+        Selected::new(items, &now, args.take)
+    };
+    let selected = Rc::new(RefCell::new(selected));
     gui::App::start(&args.file_name, selected.clone());
+    if let Some(ref selected_out) = args.selected_out {
+        selected.borrow().write_out(selected_out);
+    }
     let items = selected.borrow_mut().feedback(&now);
     if args.dry_run {
         debug!("dry run!");
@@ -40,4 +48,12 @@ struct Args {
     /// Do everything except writing back.
     #[arg(long)]
     dry_run: bool,
+
+    /// Write out the selected items.
+    #[arg(long)]
+    selected_out: Option<String>,
+
+    /// Read back the selected items.
+    #[arg(long)]
+    selected_in: Option<String>,
 }

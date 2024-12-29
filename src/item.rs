@@ -1,6 +1,7 @@
 use crate::UtcTime;
 use log::*;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
 pub struct Item {
@@ -82,6 +83,42 @@ impl Selected {
         }
     }
 
+    pub fn write_out(&self, file: &str) {
+        let out: Vec<_> = self
+            .selected_and_correctness
+            .iter()
+            .map(|x| SelectedItemInDisk {
+                index: x.0,
+                correct: x.1,
+            })
+            .collect();
+        let out = SelectedInDisk {
+            selected_items: out,
+        };
+        let content = toml::to_string_pretty(&out).unwrap();
+        std::fs::write(file, content).unwrap();
+    }
+
+    pub fn read_back(items: Vec<Item>, file: &str) -> Self {
+        let content = std::fs::read(file).unwrap();
+        let content = std::str::from_utf8(&content).unwrap();
+        let selected_items: SelectedInDisk = toml::from_str(content).unwrap();
+        let selected_and_correctness: Vec<_> = selected_items
+            .selected_items
+            .iter()
+            .map(|x| (x.index, x.correct))
+            .collect();
+        info!(
+            "{}/{} items selected.",
+            selected_and_correctness.len(),
+            items.len()
+        );
+        Self {
+            items,
+            selected_and_correctness,
+        }
+    }
+
     pub fn feedback(&mut self, now: &UtcTime) -> Vec<Item> {
         let mut res = vec![];
         std::mem::swap(&mut res, &mut self.items);
@@ -110,4 +147,15 @@ impl Selected {
     pub fn unset(&mut self, idx: usize) {
         self.selected_and_correctness[idx].1 = false;
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SelectedItemInDisk {
+    index: usize,
+    correct: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SelectedInDisk {
+    selected_items: Vec<SelectedItemInDisk>,
 }
