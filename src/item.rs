@@ -13,7 +13,7 @@ pub struct Item {
     pub tag: Option<String>,
 }
 
-const MAX_DURATION: chrono::Duration = chrono::Duration::days(180);
+const MAX_DURATION: chrono::Duration = chrono::Duration::days(360);
 const INIT_DURATION: chrono::Duration = chrono::Duration::hours(20);
 
 impl Item {
