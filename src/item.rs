@@ -14,7 +14,7 @@ pub struct Item {
 }
 
 const MAX_DURATION: chrono::Duration = chrono::Duration::days(180);
-const INIT_DURATION: chrono::Duration = chrono::Duration::hours(8);
+const INIT_DURATION: chrono::Duration = chrono::Duration::hours(20);
 
 impl Item {
     pub fn correct(&mut self, now: &UtcTime) {
