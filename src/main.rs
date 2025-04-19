@@ -1,5 +1,5 @@
 use chrono::prelude::*;
-use clap::{crate_name, crate_version, value_parser, Arg, ArgAction, Command};
+use clap::{Arg, ArgAction, Command, crate_name, crate_version, value_parser};
 use clap_complete::aot as completion;
 use log::*;
 use memory_palace::*;
@@ -87,9 +87,9 @@ fn parse_args() -> Args {
                 .action(ArgAction::Set),
         );
     let matches = cmd.clone().get_matches();
-    if let Some(gen) = matches.get_one::<completion::Shell>(COMPLETION).copied() {
+    if let Some(rdgen) = matches.get_one::<completion::Shell>(COMPLETION).copied() {
         let cmd_name = cmd.get_name().to_string();
-        completion::generate(gen, &mut cmd, cmd_name, &mut std::io::stdout());
+        completion::generate(rdgen, &mut cmd, cmd_name, &mut std::io::stdout());
         std::process::exit(0);
     }
     let file_name = matches.get_one::<String>(FILE_NAME).unwrap().clone();

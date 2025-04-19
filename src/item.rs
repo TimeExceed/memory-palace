@@ -41,8 +41,8 @@ impl Item {
 
 fn timeout(delay: &chrono::Duration) -> chrono::Duration {
     let int_dur = delay.min(&MAX_DURATION).num_seconds();
-    let mut rng = rand::thread_rng();
-    let timeout = rng.gen_range(int_dur..(int_dur + (int_dur / 2)));
+    let mut rng = rand::rng();
+    let timeout = rng.random_range(int_dur..(int_dur + (int_dur / 2)));
     chrono::Duration::seconds(timeout)
 }
 
@@ -65,7 +65,7 @@ impl Selected {
             })
             .map(|(i, _)| (i, true))
             .collect();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         selected_and_correctness.shuffle(&mut rng);
         if let Some(n) = take {
             info!("{}/{} items selected.", n, selected_and_correctness.len());
