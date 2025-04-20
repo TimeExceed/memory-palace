@@ -14,16 +14,20 @@ fn main() {
         .start()
         .unwrap();
     let args = parse_args();
-    let items = read_file(&args.file_name);
-    let now = Utc::now();
-    let selected = Selected::new(items, &now, args.take);
-    let selected = Rc::new(RefCell::new(selected));
-    gui::App::start(&args.file_name, selected.clone());
-    let items = selected.borrow_mut().feedback(&now);
-    if args.dry_run {
-        debug!("dry run!");
-    } else {
-        write_out(&args.file_name, items);
+    match args {
+        Args::Exam(args) => {
+            let items = read_file(&args.file_name);
+            let now = Utc::now();
+            let selected = Selected::new(items, &now, args.take);
+            let selected = Rc::new(RefCell::new(selected));
+            gui::App::start(&args.file_name, selected.clone());
+            let items = selected.borrow_mut().feedback(&now);
+            if args.dry_run {
+                debug!("dry run!");
+            } else {
+                write_out(&args.file_name, items);
+            }
+        }
     }
 }
 
@@ -33,53 +37,71 @@ fn parse_args() -> Args {
     const TAKE: &str = "TAKE";
     const DRY_RUN: &str = "DRY-RUN";
     let mut cmd = Command::new(crate_name!())
-        .about("Pick up something in the memory palace.")
+        .about("Do an exam in the memory palace.")
         .version(crate_version!())
-        .arg(
-            Arg::new(COMPLETION)
-                .value_name("SHELL")
-                .help("Generate the completion file.")
-                .long("completion")
-                .action(ArgAction::Set)
-                .value_parser(value_parser!(completion::Shell)),
+        .subcommand(
+            Command::new("exam")
+                .about("Do an exam.")
+                .arg(
+                    Arg::new(FILE_NAME)
+                        .help("the file of a memory palace.")
+                        .action(ArgAction::Set)
+                        .required(true),
+                )
+                .arg(
+                    Arg::new(TAKE)
+                        .value_name("N")
+                        .help("Take at most <N> things to remember.")
+                        .long("take")
+                        .action(ArgAction::Set)
+                        .value_parser(value_parser!(usize)),
+                )
+                .arg(
+                    Arg::new(DRY_RUN)
+                        .help("Do everything except writing back to disks.")
+                        .long("dry-run")
+                        .action(ArgAction::SetTrue),
+                ),
         )
-        .arg(
-            Arg::new(FILE_NAME)
-                .help("the file of a memory palace.")
-                .action(ArgAction::Set)
-                .required_unless_present(COMPLETION),
-        )
-        .arg(
-            Arg::new(TAKE)
-                .value_name("N")
-                .help("Take at most <N> things to remember.")
-                .long("take")
-                .action(ArgAction::Set)
-                .value_parser(value_parser!(usize)),
-        )
-        .arg(
-            Arg::new(DRY_RUN)
-                .help("Do everything except writing back.")
-                .long("dry-run")
-                .action(ArgAction::SetTrue),
+        .subcommand(
+            Command::new("complete")
+                .about("Generate the completion file.")
+                .arg(
+                    Arg::new(COMPLETION)
+                        .value_name("SHELL")
+                        .help("Which shell is the completion file for.")
+                        .action(ArgAction::Set)
+                        .required(true)
+                        .value_parser(value_parser!(completion::Shell)),
+                ),
         );
     let matches = cmd.clone().get_matches();
-    if let Some(rdgen) = matches.get_one::<completion::Shell>(COMPLETION).copied() {
-        let cmd_name = cmd.get_name().to_string();
-        completion::generate(rdgen, &mut cmd, cmd_name, &mut std::io::stdout());
-        std::process::exit(0);
+
+    if let Some(matches) = matches.subcommand_matches("complete") {
+        if let Some(sh) = matches.get_one::<completion::Shell>(COMPLETION).copied() {
+            let cmd_name = cmd.get_name().to_string();
+            completion::generate(sh, &mut cmd, cmd_name, &mut std::io::stdout());
+            std::process::exit(0);
+        }
     }
-    let file_name = matches.get_one::<String>(FILE_NAME).unwrap().clone();
-    let take = matches.get_one::<usize>(TAKE).copied();
-    let dry_run = matches.get_flag(DRY_RUN);
-    Args {
-        file_name,
-        dry_run,
-        take,
+    if let Some(matches) = matches.subcommand_matches("exam") {
+        let file_name = matches.get_one::<String>(FILE_NAME).unwrap().clone();
+        let take = matches.get_one::<usize>(TAKE).copied();
+        let dry_run = matches.get_flag(DRY_RUN);
+        return Args::Exam(Exam {
+            file_name,
+            dry_run,
+            take,
+        });
     }
+    unreachable!()
 }
 
-struct Args {
+enum Args {
+    Exam(Exam),
+}
+
+struct Exam {
     /// the file of a memory palace.
     file_name: String,
 
