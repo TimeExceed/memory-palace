@@ -16,16 +16,9 @@ fn main() {
     let args = parse_args();
     let items = read_file(&args.file_name);
     let now = Utc::now();
-    let selected = if let Some(ref selected_in) = args.selected_in {
-        Selected::read_back(items, selected_in)
-    } else {
-        Selected::new(items, &now, args.take)
-    };
+    let selected = Selected::new(items, &now, args.take);
     let selected = Rc::new(RefCell::new(selected));
     gui::App::start(&args.file_name, selected.clone());
-    if let Some(ref selected_out) = args.selected_out {
-        selected.borrow().write_out(selected_out);
-    }
     let items = selected.borrow_mut().feedback(&now);
     if args.dry_run {
         debug!("dry run!");
@@ -39,8 +32,6 @@ fn parse_args() -> Args {
     const FILE_NAME: &str = "FILE_NAME";
     const TAKE: &str = "TAKE";
     const DRY_RUN: &str = "DRY-RUN";
-    const SELECTED_IN: &str = "SELECTED-IN";
-    const SELECTED_OUT: &str = "SELECTED-OUT";
     let mut cmd = Command::new(crate_name!())
         .about("Pick up something in the memory palace.")
         .version(crate_version!())
@@ -71,20 +62,6 @@ fn parse_args() -> Args {
                 .help("Do everything except writing back.")
                 .long("dry-run")
                 .action(ArgAction::SetTrue),
-        )
-        .arg(
-            Arg::new(SELECTED_IN)
-                .value_name("SELECTED-FILE")
-                .help("Read back the selected items.")
-                .long("selected-in")
-                .action(ArgAction::Set),
-        )
-        .arg(
-            Arg::new(SELECTED_OUT)
-                .value_name("SELECTED-FILE")
-                .help("Write out the selected items.")
-                .long("selected-out")
-                .action(ArgAction::Set),
         );
     let matches = cmd.clone().get_matches();
     if let Some(rdgen) = matches.get_one::<completion::Shell>(COMPLETION).copied() {
@@ -95,14 +72,10 @@ fn parse_args() -> Args {
     let file_name = matches.get_one::<String>(FILE_NAME).unwrap().clone();
     let take = matches.get_one::<usize>(TAKE).copied();
     let dry_run = matches.get_flag(DRY_RUN);
-    let selected_in = matches.get_one::<String>(SELECTED_IN).cloned();
-    let selected_out = matches.get_one::<String>(SELECTED_OUT).cloned();
     Args {
         file_name,
         dry_run,
         take,
-        selected_in,
-        selected_out,
     }
 }
 
@@ -115,10 +88,4 @@ struct Args {
 
     /// Do everything except writing back.
     dry_run: bool,
-
-    /// Write out the selected items.
-    selected_out: Option<String>,
-
-    /// Read back the selected items.
-    selected_in: Option<String>,
 }
