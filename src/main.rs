@@ -1,6 +1,6 @@
 use clap::{Arg, ArgAction, Command, crate_name, crate_version, value_parser};
 use clap_complete::aot as completion;
-use memory_palace::{exam::Exam, select::Select};
+use memory_palace::{exam::Exam, select::Select, print::Print};
 use std::collections::HashSet;
 
 fn main() {
@@ -18,6 +18,9 @@ fn main() {
         Args::Select(select) => {
             select.gogogo();
         }
+        Args::Print(print) => {
+            print.gogogo();
+        }
     }
 }
 
@@ -31,9 +34,13 @@ fn parse_args() -> Args {
     const SELECT_TIMEOUT: &str = "select/TIMEOUT";
     const SELECT_TAKE: &str = "select/TAKE";
     const SELECT_TAGS: &str = "select/TAGS";
+    const PRINT_TYPST_INPUT: &str = "print/typst/INPUT";
+    const PRINT_TYPST_OUTPUT: &str = "print/typst/OUTPUT";
+
     let mut cmd = Command::new(crate_name!())
         .about("Do an exam in the memory palace.")
         .version(crate_version!())
+        .subcommand_required(true)
         .subcommand(
             Command::new("exam")
                 .about("Do an exam.")
@@ -99,6 +106,29 @@ fn parse_args() -> Args {
                 ),
         )
         .subcommand(
+            Command::new("print")
+                .about("Prints a memory palace.")
+                .subcommand_required(true)
+                .subcommand(
+                    Command::new("typst")
+                        .about("Prints a memory palace in typst format.")
+                        .arg(
+                            Arg::new(PRINT_TYPST_INPUT)
+                                .value_name("INPUT")
+                                .help("the file of a memory palace.")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new(PRINT_TYPST_OUTPUT)
+                                .value_name("OUTPUT")
+                                .help("the typst file to be printed.")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        )
+                )
+        )
+        .subcommand(
             Command::new("complete")
                 .about("Generate the completion file.")
                 .arg(
@@ -145,10 +175,18 @@ fn parse_args() -> Args {
             tags,
         });
     }
+    if let Some(matches) = matches.subcommand_matches("print") {
+        if let Some(matches) = matches.subcommand_matches("typst") {
+            let input = matches.get_one::<String>(PRINT_TYPST_INPUT).unwrap().clone();
+            let output = matches.get_one::<String>(PRINT_TYPST_OUTPUT).unwrap().clone();
+            return Args::Print(Print::Typst { input, output });
+        }
+    }
     unreachable!()
 }
 
 enum Args {
     Exam(Exam),
     Select(Select),
+    Print(Print),
 }
