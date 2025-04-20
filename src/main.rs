@@ -1,10 +1,7 @@
-use chrono::prelude::*;
 use clap::{Arg, ArgAction, Command, crate_name, crate_version, value_parser};
 use clap_complete::aot as completion;
-use log::*;
-use memory_palace::*;
-use std::cell::RefCell;
-use std::rc::Rc;
+use memory_palace::{exam::Exam, select::Select};
+use std::collections::HashSet;
 
 fn main() {
     flexi_logger::Logger::try_with_env_or_str("error, memory_palace=info")
@@ -15,27 +12,25 @@ fn main() {
         .unwrap();
     let args = parse_args();
     match args {
-        Args::Exam(args) => {
-            let items = read_file(&args.file_name);
-            let now = Utc::now();
-            let selected = Selected::new(items, &now, args.take);
-            let selected = Rc::new(RefCell::new(selected));
-            gui::App::start(&args.file_name, selected.clone());
-            let items = selected.borrow_mut().feedback(&now);
-            if args.dry_run {
-                debug!("dry run!");
-            } else {
-                write_out(&args.file_name, items);
-            }
+        Args::Exam(exam) => {
+            exam.gogogo();
+        }
+        Args::Select(select) => {
+            select.gogogo();
         }
     }
 }
 
 fn parse_args() -> Args {
     const COMPLETION: &str = "COMPLETION";
-    const FILE_NAME: &str = "FILE_NAME";
-    const TAKE: &str = "TAKE";
-    const DRY_RUN: &str = "DRY-RUN";
+    const EXAM_FILE_NAME: &str = "exam/FILE_NAME";
+    const EXAM_TAKE: &str = "exam/TAKE";
+    const EXAM_DRY_RUN: &str = "exam/DRY-RUN";
+    const SELECT_IN: &str = "select/IN-FILE";
+    const SELECT_OUT: &str = "select/OUT-FILE";
+    const SELECT_TIMEOUT: &str = "select/TIMEOUT";
+    const SELECT_TAKE: &str = "select/TAKE";
+    const SELECT_TAGS: &str = "select/TAGS";
     let mut cmd = Command::new(crate_name!())
         .about("Do an exam in the memory palace.")
         .version(crate_version!())
@@ -43,24 +38,64 @@ fn parse_args() -> Args {
             Command::new("exam")
                 .about("Do an exam.")
                 .arg(
-                    Arg::new(FILE_NAME)
+                    Arg::new(EXAM_FILE_NAME)
                         .help("the file of a memory palace.")
                         .action(ArgAction::Set)
                         .required(true),
                 )
                 .arg(
-                    Arg::new(TAKE)
+                    Arg::new(EXAM_TAKE)
                         .value_name("N")
-                        .help("Take at most <N> things to remember.")
+                        .help("Take at most <N> items to go over.")
                         .long("take")
                         .action(ArgAction::Set)
                         .value_parser(value_parser!(usize)),
                 )
                 .arg(
-                    Arg::new(DRY_RUN)
+                    Arg::new(EXAM_DRY_RUN)
                         .help("Do everything except writing back to disks.")
                         .long("dry-run")
                         .action(ArgAction::SetTrue),
+                ),
+        )
+        .subcommand(
+            Command::new("select")
+                .about("Select some items.")
+                .arg(
+                    Arg::new(SELECT_IN)
+                        .value_name("IN-FILE")
+                        .help("the file of a memory palace.")
+                        .required(true)
+                        .action(ArgAction::Set),
+                )
+                .arg(
+                    Arg::new(SELECT_OUT)
+                        .value_name("OUT-FILE")
+                        .help("the file to be appended.")
+                        .required(true)
+                        .action(ArgAction::Set),
+                )
+                .arg(
+                    Arg::new(SELECT_TIMEOUT)
+                        .help("selects timed out items only.")
+                        .long("timeout")
+                        .action(ArgAction::SetTrue),
+                )
+                .arg(
+                    Arg::new(SELECT_TAKE)
+                        .value_name("N")
+                        .help("takes randomly at most <N> items.")
+                        .long("take")
+                        .action(ArgAction::Set)
+                        .value_parser(value_parser!(usize)),
+                )
+                .arg(
+                    Arg::new(SELECT_TAGS)
+                        .value_name("TAG")
+                        .help("selects only items with one of the specified tags.")
+                        .long("tag")
+                        .num_args(1..)
+                        .action(ArgAction::Append),
                 ),
         )
         .subcommand(
@@ -85,13 +120,29 @@ fn parse_args() -> Args {
         }
     }
     if let Some(matches) = matches.subcommand_matches("exam") {
-        let file_name = matches.get_one::<String>(FILE_NAME).unwrap().clone();
-        let take = matches.get_one::<usize>(TAKE).copied();
-        let dry_run = matches.get_flag(DRY_RUN);
+        let file_name = matches.get_one::<String>(EXAM_FILE_NAME).unwrap().clone();
+        let take = matches.get_one::<usize>(EXAM_TAKE).copied();
+        let dry_run = matches.get_flag(EXAM_DRY_RUN);
         return Args::Exam(Exam {
             file_name,
             dry_run,
             take,
+        });
+    }
+    if let Some(matches) = matches.subcommand_matches("select") {
+        let input = matches.get_one::<String>(SELECT_IN).unwrap().clone();
+        let output = matches.get_one::<String>(SELECT_OUT).unwrap().clone();
+        let take = matches.get_one::<usize>(SELECT_TAKE).copied();
+        let timeout = matches.get_flag(SELECT_TIMEOUT);
+        let tags = matches
+            .get_many(SELECT_TAGS)
+            .map(|tags| tags.cloned().collect::<HashSet<_>>());
+        return Args::Select(Select {
+            input,
+            output,
+            take,
+            timeout,
+            tags,
         });
     }
     unreachable!()
@@ -99,15 +150,5 @@ fn parse_args() -> Args {
 
 enum Args {
     Exam(Exam),
-}
-
-struct Exam {
-    /// the file of a memory palace.
-    file_name: String,
-
-    /// Take at most `TAKE` things to remember.
-    take: Option<usize>,
-
-    /// Do everything except writing back.
-    dry_run: bool,
+    Select(Select),
 }

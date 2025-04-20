@@ -1,4 +1,4 @@
-use crate::Selected;
+use super::Selected;
 use eframe::egui;
 use egui::widget_text::RichText;
 use log::*;
