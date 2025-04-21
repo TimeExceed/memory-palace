@@ -1,7 +1,7 @@
-pub mod print;
 pub mod exam;
 mod file;
 mod item;
+pub mod print;
 pub mod select;
 
 pub use self::file::*;

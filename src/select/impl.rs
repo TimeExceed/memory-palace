@@ -63,10 +63,12 @@ impl Select {
             });
         }
         if let Some(n) = self.take {
-            debug!("shuffle and take {n} items.");
+            info!("shuffle and take {n} out of {} items.", items.len());
             let mut rng = rand::rng();
             items.shuffle(&mut rng);
             items.truncate(n);
+        } else {
+            info!("take all {} items.", items.len());
         }
         append(&self.output, items);
     }

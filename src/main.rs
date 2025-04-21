@@ -1,6 +1,6 @@
 use clap::{Arg, ArgAction, Command, crate_name, crate_version, value_parser};
 use clap_complete::aot as completion;
-use memory_palace::{exam::Exam, select::Select, print::Print};
+use memory_palace::{exam::Exam, print::Print, select::Select};
 use std::collections::HashSet;
 
 fn main() {
@@ -125,8 +125,8 @@ fn parse_args() -> Args {
                                 .help("the typst file to be printed.")
                                 .required(true)
                                 .action(ArgAction::Set),
-                        )
-                )
+                        ),
+                ),
         )
         .subcommand(
             Command::new("complete")
@@ -177,8 +177,14 @@ fn parse_args() -> Args {
     }
     if let Some(matches) = matches.subcommand_matches("print") {
         if let Some(matches) = matches.subcommand_matches("typst") {
-            let input = matches.get_one::<String>(PRINT_TYPST_INPUT).unwrap().clone();
-            let output = matches.get_one::<String>(PRINT_TYPST_OUTPUT).unwrap().clone();
+            let input = matches
+                .get_one::<String>(PRINT_TYPST_INPUT)
+                .unwrap()
+                .clone();
+            let output = matches
+                .get_one::<String>(PRINT_TYPST_OUTPUT)
+                .unwrap()
+                .clone();
             return Args::Print(Print::Typst { input, output });
         }
     }
