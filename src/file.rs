@@ -2,6 +2,7 @@ use crate::*;
 use chrono::prelude::*;
 use log::*;
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 
 pub fn read_file(file_name: &str) -> Vec<Item> {
     let content = std::fs::read(file_name).unwrap();
@@ -17,6 +18,20 @@ pub fn write_out(file_name: &str, items: Vec<Item>) {
     let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();
     std::fs::write(file_name, content).unwrap();
+}
+
+pub fn append(file_name: &str, items: Vec<Item>) {
+    debug!("append {} items into {}.", items.len(), file_name);
+    let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
+    let items = ItemsInDisk { items };
+    let content = toml::to_string_pretty(&items).unwrap();
+    let mut fp = std::fs::File::options()
+        .create(true)
+        .append(true)
+        .open(file_name)
+        .unwrap();
+    fp.write_all(content.as_bytes()).unwrap();
+    fp.write_all("\n".as_bytes()).unwrap();
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

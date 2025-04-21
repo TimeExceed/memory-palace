@@ -68,6 +68,6 @@ impl Select {
             items.shuffle(&mut rng);
             items.truncate(n);
         }
-        write_out(&self.output, items);
+        append(&self.output, items);
     }
 }
