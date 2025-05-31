@@ -3,6 +3,7 @@ mod file;
 mod item;
 pub mod print;
 pub mod select;
+pub mod update;
 
 pub use self::file::*;
 pub use self::item::*;

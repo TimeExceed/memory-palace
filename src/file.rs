@@ -16,9 +16,9 @@ pub fn read_file(file_name: &Path) -> Vec<Item> {
     items.items.into_iter().map(|x| x.into()).collect()
 }
 
-pub fn write_out(file_name: &Path, items: Vec<Item>) {
+pub fn write_out(file_name: &Path, items: &[Item]) {
     debug!("write {} items into {}.", items.len(), file_name.display());
-    let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
+    let items: Vec<ItemInDisk> = items.iter().map(|x| x.into()).collect();
     let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();
     std::fs::write(file_name, content).unwrap();
@@ -26,7 +26,7 @@ pub fn write_out(file_name: &Path, items: Vec<Item>) {
 
 pub fn append(file_name: &Path, items: Vec<Item>) {
     debug!("append {} items into {}.", items.len(), file_name.display());
-    let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
+    let items: Vec<ItemInDisk> = items.iter().map(|x| x.into()).collect();
     let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();
     let mut fp = std::fs::File::options()
@@ -81,15 +81,15 @@ impl From<ItemInDisk> for Item {
     }
 }
 
-impl From<Item> for ItemInDisk {
-    fn from(value: Item) -> Self {
+impl From<&Item> for ItemInDisk {
+    fn from(value: &Item) -> Self {
         Self {
-            question: value.question,
-            answer: value.answer,
+            question: value.question.clone(),
+            answer: value.answer.clone(),
             first_remember_time: value.first_remember_time.map(|x| WrapDatetime(x).into()),
             last_check_time: value.last_check_time.map(|x| WrapDatetime(x).into()),
             due_time: value.due_time.map(|x| WrapDatetime(x).into()),
-            tag: value.tag,
+            tag: value.tag.clone(),
         }
     }
 }

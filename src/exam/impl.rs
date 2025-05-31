@@ -25,7 +25,7 @@ impl Exam {
         if self.dry_run {
             info!("dry run!");
         } else {
-            write_out(&self.file_name, items);
+            write_out(&self.file_name, &items);
         }
     }
 }
