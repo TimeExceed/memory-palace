@@ -1,7 +1,7 @@
 use crate::*;
-use std::fmt::Write;
+use std::{fmt::Write, path::Path};
 
-pub(super) fn typst(input: &str, output: &str) {
+pub(super) fn typst(input: &Path, output: &Path) {
     let items = read_file(input);
     let mut buf = String::new();
     writeln!(

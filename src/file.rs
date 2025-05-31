@@ -2,26 +2,30 @@ use crate::*;
 use chrono::prelude::*;
 use log::*;
 use serde::{Deserialize, Serialize};
-use std::io::Write;
+use std::{io::Write, path::Path};
 
-pub fn read_file(file_name: &str) -> Vec<Item> {
+pub fn read_file(file_name: &Path) -> Vec<Item> {
     let content = std::fs::read(file_name).unwrap();
     let content = std::str::from_utf8(&content).unwrap();
     let items: ItemsInDisk = toml::from_str(content).unwrap();
-    debug!("read {} items from {}.", items.items.len(), file_name);
+    debug!(
+        "read {} items from {}.",
+        items.items.len(),
+        file_name.display()
+    );
     items.items.into_iter().map(|x| x.into()).collect()
 }
 
-pub fn write_out(file_name: &str, items: Vec<Item>) {
-    debug!("write {} items into {}.", items.len(), file_name);
+pub fn write_out(file_name: &Path, items: Vec<Item>) {
+    debug!("write {} items into {}.", items.len(), file_name.display());
     let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
     let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();
     std::fs::write(file_name, content).unwrap();
 }
 
-pub fn append(file_name: &str, items: Vec<Item>) {
-    debug!("append {} items into {}.", items.len(), file_name);
+pub fn append(file_name: &Path, items: Vec<Item>) {
+    debug!("append {} items into {}.", items.len(), file_name.display());
     let items: Vec<ItemInDisk> = items.into_iter().map(|x| x.into()).collect();
     let items = ItemsInDisk { items };
     let content = toml::to_string_pretty(&items).unwrap();

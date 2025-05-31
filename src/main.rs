@@ -1,7 +1,7 @@
 use clap::{Arg, ArgAction, Command, crate_name, crate_version, value_parser};
 use clap_complete::aot as completion;
 use memory_palace::{exam::Exam, print::Print, select::Select};
-use std::collections::HashSet;
+use std::{collections::HashSet, path::PathBuf};
 
 fn main() {
     flexi_logger::Logger::try_with_env_or_str("error, memory_palace=info")
@@ -48,7 +48,8 @@ fn parse_args() -> Args {
                     Arg::new(EXAM_FILE_NAME)
                         .help("the file of a memory palace.")
                         .action(ArgAction::Set)
-                        .required(true),
+                        .required(true)
+                        .value_parser(value_parser!(PathBuf)),
                 )
                 .arg(
                     Arg::new(EXAM_TAKE)
@@ -73,14 +74,16 @@ fn parse_args() -> Args {
                         .value_name("IN-FILE")
                         .help("the file of a memory palace.")
                         .required(true)
-                        .action(ArgAction::Set),
+                        .action(ArgAction::Set)
+                        .value_parser(value_parser!(PathBuf)),
                 )
                 .arg(
                     Arg::new(SELECT_OUT)
                         .value_name("OUT-FILE")
                         .help("the file to be appended.")
                         .required(true)
-                        .action(ArgAction::Set),
+                        .action(ArgAction::Set)
+                        .value_parser(value_parser!(PathBuf)),
                 )
                 .arg(
                     Arg::new(SELECT_TIMEOUT)
@@ -117,14 +120,16 @@ fn parse_args() -> Args {
                                 .value_name("INPUT")
                                 .help("the file of a memory palace.")
                                 .required(true)
-                                .action(ArgAction::Set),
+                                .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf)),
                         )
                         .arg(
                             Arg::new(PRINT_TYPST_OUTPUT)
                                 .value_name("OUTPUT")
                                 .help("the typst file to be printed.")
                                 .required(true)
-                                .action(ArgAction::Set),
+                                .action(ArgAction::Set)
+                                .value_parser(value_parser!(PathBuf)),
                         ),
                 ),
         )
@@ -150,7 +155,7 @@ fn parse_args() -> Args {
         }
     }
     if let Some(matches) = matches.subcommand_matches("exam") {
-        let file_name = matches.get_one::<String>(EXAM_FILE_NAME).unwrap().clone();
+        let file_name = matches.get_one::<PathBuf>(EXAM_FILE_NAME).unwrap().clone();
         let take = matches.get_one::<usize>(EXAM_TAKE).copied();
         let dry_run = matches.get_flag(EXAM_DRY_RUN);
         return Args::Exam(Exam {
@@ -160,8 +165,8 @@ fn parse_args() -> Args {
         });
     }
     if let Some(matches) = matches.subcommand_matches("select") {
-        let input = matches.get_one::<String>(SELECT_IN).unwrap().clone();
-        let output = matches.get_one::<String>(SELECT_OUT).unwrap().clone();
+        let input = matches.get_one::<PathBuf>(SELECT_IN).unwrap().clone();
+        let output = matches.get_one::<PathBuf>(SELECT_OUT).unwrap().clone();
         let take = matches.get_one::<usize>(SELECT_TAKE).copied();
         let timeout = matches.get_flag(SELECT_TIMEOUT);
         let tags = matches
@@ -178,11 +183,11 @@ fn parse_args() -> Args {
     if let Some(matches) = matches.subcommand_matches("print") {
         if let Some(matches) = matches.subcommand_matches("typst") {
             let input = matches
-                .get_one::<String>(PRINT_TYPST_INPUT)
+                .get_one::<PathBuf>(PRINT_TYPST_INPUT)
                 .unwrap()
                 .clone();
             let output = matches
-                .get_one::<String>(PRINT_TYPST_OUTPUT)
+                .get_one::<PathBuf>(PRINT_TYPST_OUTPUT)
                 .unwrap()
                 .clone();
             return Args::Print(Print::Typst { input, output });

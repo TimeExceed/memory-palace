@@ -1,8 +1,9 @@
 use super::*;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum Print {
-    Typst { input: String, output: String },
+    Typst { input: PathBuf, output: PathBuf },
 }
 
 impl Print {

@@ -2,15 +2,15 @@ use crate::*;
 use chrono::prelude::*;
 use log::*;
 use rand::prelude::*;
-use std::collections::*;
+use std::{collections::*, path::PathBuf};
 
 #[derive(Debug)]
 pub struct Select {
     /// the file to be selected from
-    pub input: String,
+    pub input: PathBuf,
 
     /// the file to be wrote out
-    pub output: String,
+    pub output: PathBuf,
 
     /// Selects at most N items of things.
     pub take: Option<usize>,

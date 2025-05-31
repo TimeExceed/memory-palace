@@ -1,11 +1,11 @@
 use crate::*;
 use chrono::prelude::*;
 use log::*;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
 pub struct Exam {
     /// the file of a memory palace.
-    pub file_name: String,
+    pub file_name: PathBuf,
 
     /// Take at most N items of things to remember.
     pub take: Option<usize>,

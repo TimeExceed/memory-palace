@@ -2,7 +2,7 @@ use super::Selected;
 use eframe::egui;
 use egui::widget_text::RichText;
 use log::*;
-use std::{cell::RefCell, rc::Rc, sync::Arc};
+use std::{cell::RefCell, path::Path, rc::Rc, sync::Arc};
 
 pub struct App {
     selected: Rc<RefCell<Selected>>,
@@ -14,10 +14,10 @@ impl App {
         Self { selected }
     }
 
-    pub fn start(file_name: &str, selected: Rc<RefCell<Selected>>) {
+    pub fn start(file_name: &Path, selected: Rc<RefCell<Selected>>) {
         let options = eframe::NativeOptions::default();
         eframe::run_native(
-            &format!("{} - Memory Palace", file_name),
+            &format!("{} - Memory Palace", file_name.display()),
             options,
             Box::new(move |cc| Ok(Box::new(Self::new(&cc.egui_ctx, selected)))),
         )
