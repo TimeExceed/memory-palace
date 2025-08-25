@@ -34,12 +34,14 @@ fn parse_args() -> Args {
     const EXAM_FILE_NAME: &str = "exam/FILE_NAME";
     const EXAM_TAKE: &str = "exam/TAKE";
     const EXAM_DRY_RUN: &str = "exam/DRY-RUN";
+    const EXAM_SORT: &str = "exam/SORT";
     const SELECT: &str = "select";
     const SELECT_IN: &str = "select/IN-FILE";
     const SELECT_OUT: &str = "select/OUT-FILE";
     const SELECT_TIMEOUT: &str = "select/TIMEOUT";
     const SELECT_TAKE: &str = "select/TAKE";
     const SELECT_TAGS: &str = "select/TAGS";
+    const SELECT_SORT: &str = "select/SORT";
     const PRINT: &str = "print";
     const PRINT_TYPST: &str = "typst";
     const PRINT_TYPST_INPUT: &str = "print/typst/INPUT";
@@ -74,6 +76,12 @@ fn parse_args() -> Args {
                     Arg::new(EXAM_DRY_RUN)
                         .help("Do everything except writing back to disks.")
                         .long("dry-run")
+                        .action(ArgAction::SetTrue),
+                )
+                .arg(
+                    Arg::new(EXAM_SORT)
+                        .help("Sort items.")
+                        .long("sort")
                         .action(ArgAction::SetTrue),
                 ),
         )
@@ -117,6 +125,12 @@ fn parse_args() -> Args {
                         .long("tag")
                         .num_args(1..)
                         .action(ArgAction::Append),
+                )
+                .arg(
+                    Arg::new(SELECT_SORT)
+                        .help("sorts the selected items.")
+                        .long("sort")
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -195,10 +209,12 @@ fn parse_args() -> Args {
         let file_name = matches.get_one::<PathBuf>(EXAM_FILE_NAME).unwrap().clone();
         let take = matches.get_one::<usize>(EXAM_TAKE).copied();
         let dry_run = matches.get_flag(EXAM_DRY_RUN);
+        let sort = matches.get_flag(EXAM_SORT);
         return Args::Exam(Exam {
             file_name,
             dry_run,
             take,
+            sort,
         });
     }
     if let Some(matches) = matches.subcommand_matches(SELECT) {
@@ -209,12 +225,14 @@ fn parse_args() -> Args {
         let tags = matches
             .get_many(SELECT_TAGS)
             .map(|tags| tags.cloned().collect::<HashSet<_>>());
+        let sort = matches.get_flag(SELECT_SORT);
         return Args::Select(Select {
             input,
             output,
             take,
             timeout,
             tags,
+            sort,
         });
     }
     if let Some(matches) = matches.subcommand_matches(PRINT) {

@@ -20,6 +20,9 @@ pub struct Select {
 
     /// Selects only items with one of the specified tags
     pub tags: Option<HashSet<String>>,
+
+    /// Sorts the selected items.
+    pub sort: bool,
 }
 
 impl Select {
@@ -69,6 +72,9 @@ impl Select {
             items.truncate(n);
         } else {
             info!("take all {} items.", items.len());
+        }
+        if self.sort {
+            items.sort_by_key(|x| x.question.clone());
         }
         append(&self.output, items);
     }

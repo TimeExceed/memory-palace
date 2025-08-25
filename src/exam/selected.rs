@@ -1,4 +1,5 @@
 use crate::{Item, UtcTime};
+use super::r#impl::Exam;
 use log::*;
 use rand::prelude::*;
 
@@ -8,7 +9,7 @@ pub struct Selected {
 }
 
 impl Selected {
-    pub fn new(items: Vec<Item>, now: &UtcTime, take: Option<usize>) -> Self {
+    pub fn new(items: Vec<Item>, now: &UtcTime, cfg: &Exam) -> Self {
         let mut selected_and_correctness: Vec<_> = items
             .iter()
             .enumerate()
@@ -21,9 +22,13 @@ impl Selected {
             })
             .map(|(i, _)| (i, true))
             .collect();
-        let mut rng = rand::rng();
-        selected_and_correctness.shuffle(&mut rng);
-        if let Some(n) = take {
+        if cfg.sort {
+            selected_and_correctness.sort_by_key(|x| &items[x.0].question);
+        } else {
+            let mut rng = rand::rng();
+            selected_and_correctness.shuffle(&mut rng);
+        }
+        if let Some(n) = cfg.take {
             info!("{}/{} items selected.", n, selected_and_correctness.len());
             selected_and_correctness.truncate(n);
         } else {

@@ -12,13 +12,16 @@ pub struct Exam {
 
     /// Do everything except writing back.
     pub dry_run: bool,
+
+    /// Sort items
+    pub sort: bool,
 }
 
 impl Exam {
     pub fn gogogo(&self) {
         let items = read_file(&self.file_name);
         let now = Utc::now();
-        let selected = exam::Selected::new(items, &now, self.take);
+        let selected = exam::Selected::new(items, &now, self);
         let selected = Rc::new(RefCell::new(selected));
         exam::gui::App::start(&self.file_name, selected.clone());
         let items = selected.borrow_mut().feedback(&now);
