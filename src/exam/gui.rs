@@ -36,11 +36,11 @@ impl eframe::App for App {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.checkbox(
                                 corr,
-                                RichText::new(item.question.clone()).monospace().size(18.0),
+                                RichText::new(item.question.clone()).text_style(egui::TextStyle::Body).size(18.0),
                             );
                         });
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.label(RichText::new(item.answer.clone()).monospace().size(18.0));
+                            ui.label(RichText::new(item.answer.clone()).text_style(egui::TextStyle::Body).size(18.0));
                         });
                         ui.end_row();
                     }
@@ -63,11 +63,13 @@ fn setup_custom_fonts(ctx: &egui::Context) {
     fonts.font_data.insert(
         "cjk".to_owned(),
         Arc::new(egui::FontData::from_static(include_bytes!(
-            "/usr/local/share/fonts/maple-mono/MapleMonoNormalNL-NF-CN-Regular.ttf"
+            "/usr/local/share/fonts/lxgw-wenkai-v1.530/LXGWWenKai-Regular.ttf"
         ))),
     );
-    if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
+    if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
         fs.push("cjk".to_owned());
+    } else {
+        unreachable!()
     }
     ctx.set_fonts(fonts);
 }
