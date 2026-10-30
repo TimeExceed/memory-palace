@@ -11,6 +11,7 @@ pub struct App {
 impl App {
     pub fn new(ctx: &egui::Context, selected: Rc<RefCell<Selected>>) -> Self {
         setup_custom_fonts(ctx);
+        setup_light_theme(ctx);
         Self { selected }
     }
 
@@ -72,4 +73,17 @@ fn setup_custom_fonts(ctx: &egui::Context) {
         unreachable!()
     }
     ctx.set_fonts(fonts);
+}
+
+fn setup_light_theme(ctx: &egui::Context) {
+    // Always use light mode (ignore the system theme), with a pure white
+    // background and black text.
+    ctx.set_theme(egui::Theme::Light);
+    ctx.global_style_mut(|style| {
+        let mut visuals = egui::Visuals::light();
+        visuals.panel_fill = egui::Color32::WHITE;
+        visuals.window_fill = egui::Color32::WHITE;
+        visuals.override_text_color = Some(egui::Color32::BLACK);
+        style.visuals = visuals;
+    });
 }
