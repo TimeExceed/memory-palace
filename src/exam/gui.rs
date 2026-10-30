@@ -63,7 +63,7 @@ fn setup_custom_fonts(ctx: &egui::Context) {
     fonts.font_data.insert(
         "cjk".to_owned(),
         Arc::new(egui::FontData::from_static(include_bytes!(
-            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+            "/usr/local/share/fonts/maple-mono/MapleMonoNormalNL-NF-CN-Regular.ttf"
         ))),
     );
     if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
