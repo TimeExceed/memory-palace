@@ -37,11 +37,17 @@ impl eframe::App for App {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.checkbox(
                                 corr,
-                                RichText::new(item.question.clone()).text_style(egui::TextStyle::Body).size(18.0),
+                                RichText::new(item.question.clone())
+                                    .text_style(egui::TextStyle::Body)
+                                    .size(18.0),
                             );
                         });
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.label(RichText::new(item.answer.clone()).text_style(egui::TextStyle::Body).size(18.0));
+                            ui.label(
+                                RichText::new(item.answer.clone())
+                                    .text_style(egui::TextStyle::Body)
+                                    .size(18.0),
+                            );
                         });
                         ui.end_row();
                     }
