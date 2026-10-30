@@ -195,15 +195,14 @@ fn parse_args() -> Args {
         );
     let matches = cmd.clone().get_matches();
 
-    if let Some(matches) = matches.subcommand_matches(COMPLETION) {
-        if let Some(sh) = matches
+    if let Some(matches) = matches.subcommand_matches(COMPLETION)
+        && let Some(sh) = matches
             .get_one::<completion::Shell>(COMPLETION_SHELL)
             .copied()
-        {
-            let cmd_name = cmd.get_name().to_string();
-            completion::generate(sh, &mut cmd, cmd_name, &mut std::io::stdout());
-            std::process::exit(0);
-        }
+    {
+        let cmd_name = cmd.get_name().to_string();
+        completion::generate(sh, &mut cmd, cmd_name, &mut std::io::stdout());
+        std::process::exit(0);
     }
     if let Some(matches) = matches.subcommand_matches(EXAM) {
         let file_name = matches.get_one::<PathBuf>(EXAM_FILE_NAME).unwrap().clone();
@@ -235,18 +234,18 @@ fn parse_args() -> Args {
             sort,
         });
     }
-    if let Some(matches) = matches.subcommand_matches(PRINT) {
-        if let Some(matches) = matches.subcommand_matches(PRINT_TYPST) {
-            let input = matches
-                .get_one::<PathBuf>(PRINT_TYPST_INPUT)
-                .unwrap()
-                .clone();
-            let output = matches
-                .get_one::<PathBuf>(PRINT_TYPST_OUTPUT)
-                .unwrap()
-                .clone();
-            return Args::Print(Print::Typst { input, output });
-        }
+    if let Some(matches) = matches.subcommand_matches(PRINT)
+        && let Some(matches) = matches.subcommand_matches(PRINT_TYPST)
+    {
+        let input = matches
+            .get_one::<PathBuf>(PRINT_TYPST_INPUT)
+            .unwrap()
+            .clone();
+        let output = matches
+            .get_one::<PathBuf>(PRINT_TYPST_OUTPUT)
+            .unwrap()
+            .clone();
+        return Args::Print(Print::Typst { input, output });
     }
     if let Some(matches) = matches.subcommand_matches(UPDATE) {
         let into: Vec<_> = matches

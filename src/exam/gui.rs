@@ -11,6 +11,7 @@ pub struct App {
 impl App {
     pub fn new(ctx: &egui::Context, selected: Rc<RefCell<Selected>>) -> Self {
         setup_custom_fonts(ctx);
+        setup_light_theme(ctx);
         Self { selected }
     }
 
@@ -27,20 +28,26 @@ impl App {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let mut items = self.selected.borrow().items();
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 egui::Grid::new(ui.next_auto_id()).show(ui, |ui| {
                     for (item, corr) in items.iter_mut() {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.checkbox(
                                 corr,
-                                RichText::new(item.question.clone()).monospace().size(16.0),
+                                RichText::new(item.question.clone())
+                                    .text_style(egui::TextStyle::Body)
+                                    .size(18.0),
                             );
                         });
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.label(RichText::new(item.answer.clone()).monospace().size(16.0));
+                            ui.label(
+                                RichText::new(item.answer.clone())
+                                    .text_style(egui::TextStyle::Body)
+                                    .size(18.0),
+                            );
                         });
                         ui.end_row();
                     }
@@ -63,11 +70,26 @@ fn setup_custom_fonts(ctx: &egui::Context) {
     fonts.font_data.insert(
         "cjk".to_owned(),
         Arc::new(egui::FontData::from_static(include_bytes!(
-            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+            "/usr/local/share/fonts/lxgw-wenkai-v1.530/LXGWWenKai-Regular.ttf"
         ))),
     );
-    if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
+    if let Some(fs) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
         fs.push("cjk".to_owned());
+    } else {
+        unreachable!()
     }
     ctx.set_fonts(fonts);
+}
+
+fn setup_light_theme(ctx: &egui::Context) {
+    // Always use light mode (ignore the system theme), with a pure white
+    // background and black text.
+    ctx.set_theme(egui::Theme::Light);
+    ctx.global_style_mut(|style| {
+        let mut visuals = egui::Visuals::light();
+        visuals.panel_fill = egui::Color32::WHITE;
+        visuals.window_fill = egui::Color32::WHITE;
+        visuals.override_text_color = Some(egui::Color32::BLACK);
+        style.visuals = visuals;
+    });
 }

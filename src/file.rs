@@ -111,8 +111,8 @@ impl From<toml::value::Datetime> for WrapDatetime {
         let time = chrono::NaiveTime::from_hms_nano_opt(
             toml_time.hour as u32,
             toml_time.minute as u32,
-            toml_time.second as u32,
-            toml_time.nanosecond,
+            toml_time.second.unwrap_or(0) as u32,
+            toml_time.nanosecond.unwrap_or(0),
         )
         .unwrap();
         let datetime = chrono::NaiveDateTime::new(date, time);
@@ -134,8 +134,8 @@ impl From<WrapDatetime> for toml::value::Datetime {
             time: Some(toml::value::Time {
                 hour: time.hour() as u8,
                 minute: time.minute() as u8,
-                second: time.second() as u8,
-                nanosecond: 0,
+                second: Some(time.second() as u8),
+                nanosecond: Some(0),
             }),
             offset: Some(toml::value::Offset::Z),
         }
