@@ -36,11 +36,11 @@ impl eframe::App for App {
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
                             ui.checkbox(
                                 corr,
-                                RichText::new(item.question.clone()).monospace().size(16.0),
+                                RichText::new(item.question.clone()).monospace().size(18.0),
                             );
                         });
                         ui.with_layout(egui::Layout::left_to_right(egui::Align::TOP), |ui| {
-                            ui.label(RichText::new(item.answer.clone()).monospace().size(16.0));
+                            ui.label(RichText::new(item.answer.clone()).monospace().size(18.0));
                         });
                         ui.end_row();
                     }
